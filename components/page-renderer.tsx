@@ -964,6 +964,7 @@ function ProjectDetailPage({ project }: { project: Project }) {
         description={project.summary}
         image={project.image}
         compact
+        visual={false}
       >
         <Button asChild size="lg">
           <Link href="/contact/">Discuss a Similar Project</Link>
