@@ -901,7 +901,6 @@ function ProjectsPage({ title, description }: { title: string; description: stri
         description={description}
         image="/images/project-delivery.png"
         compact
-        visual={false}
       />
       <section className="section-surface py-24">
         <div className="container grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -919,14 +918,16 @@ function ProjectCard({ project }: { project: Project }) {
   return (
     <Card className="premium-card group flex h-full flex-col overflow-hidden border-white/80 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-900/10">
       <Link href={project.href} className="block">
-        <div className="relative h-56 overflow-hidden bg-slate-100">
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
-          />
+        <div className="bg-slate-100 p-2 dark:bg-slate-950">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-white shadow-inner dark:bg-slate-900">
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              className="object-contain transition duration-500 group-hover:scale-[1.03]"
+            />
+          </div>
         </div>
       </Link>
       <CardHeader className="flex-1">
@@ -961,7 +962,6 @@ function ProjectDetailPage({ project }: { project: Project }) {
         description={project.summary}
         image={project.image}
         compact
-        visual={false}
       >
         <Button asChild size="lg">
           <Link href="/contact/">Discuss a Similar Project</Link>
