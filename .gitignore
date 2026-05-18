@@ -1,0 +1,7 @@
+node_modules/
+.next/
+out/
+.codex-run/
+.env*
+*.log
+*.zip
