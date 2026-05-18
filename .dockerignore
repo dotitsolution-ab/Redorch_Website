@@ -1,0 +1,12 @@
+.git
+.github
+.next
+.codex-run
+node_modules
+out
+*.log
+*.zip
+.env
+.env.*
+README.md
+CPANEL_DEPLOY.md
