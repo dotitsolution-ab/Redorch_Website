@@ -1239,6 +1239,7 @@ function BlogPage() {
         description="Human-written articles for business owners planning websites, mobile apps, custom software, SEO, and CMS-ready digital products."
         image="/images/generated/seo-content-growth-workspace.webp"
         compact
+        visual={false}
       />
       <section className="section-surface py-24">
         <div className="container">
@@ -1394,6 +1395,7 @@ function LegalPage({ path }: { path: keyof typeof legalPages }) {
         description={page.description}
         image="/images/generated/business-cms-backend-dashboard.webp"
         compact
+        visual={false}
       />
       <section className="section-surface py-24">
         <div className="container max-w-4xl">
