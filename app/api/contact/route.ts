@@ -13,9 +13,15 @@ type ContactPayload = {
 };
 
 const defaultRecipients = ["nazmul@redorch.com", "ab@redorch.com"];
+const defaultFromAddress = "hello@redorch.com";
+const defaultZeptoMailEndpoint = "https://api.zeptomail.com/v1.1/email";
 
 function clean(value: unknown, maxLength = 1200) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function getEnv(name: string) {
+  return process.env[name]?.trim() || "";
 }
 
 function escapeHtml(value: string) {
@@ -32,7 +38,8 @@ function isEmail(value: string) {
 }
 
 function getRecipients() {
-  const configured = process.env.CONTACT_TO_EMAILS?.split(",")
+  const configured = getEnv("CONTACT_TO_EMAILS")
+    ?.split(",")
     .map((item) => item.trim())
     .filter(Boolean);
 
@@ -40,9 +47,50 @@ function getRecipients() {
 }
 
 function getAuthorizationHeader(apiKey: string) {
-  return apiKey.toLowerCase().startsWith("zoho-enczapikey ")
-    ? apiKey
-    : `Zoho-enczapikey ${apiKey}`;
+  const value = apiKey.trim();
+
+  return value.toLowerCase().startsWith("zoho-enczapikey ")
+    ? value
+    : `Zoho-enczapikey ${value}`;
+}
+
+function getEmailServiceUrl() {
+  return getEnv("ZEPTOMAIL_API_URL") || defaultZeptoMailEndpoint;
+}
+
+function parseZeptoMailError(responseText: string) {
+  try {
+    const parsed = JSON.parse(responseText) as {
+      error?: {
+        code?: string;
+        message?: string;
+        request_id?: string;
+        details?: { code?: string; message?: string; target?: string }[];
+      };
+      message?: string;
+      request_id?: string;
+    };
+
+    const details = parsed.error?.details
+      ?.map((detail) =>
+        [detail.target, detail.code, detail.message].filter(Boolean).join(": "),
+      )
+      .filter(Boolean);
+
+    return {
+      code: parsed.error?.code,
+      message: parsed.error?.message || parsed.message || responseText,
+      requestId: parsed.error?.request_id || parsed.request_id,
+      details,
+    };
+  } catch {
+    return {
+      code: undefined,
+      message: responseText,
+      requestId: undefined,
+      details: undefined,
+    };
+  }
 }
 
 function buildEmailHtml({
@@ -186,13 +234,30 @@ export async function POST(request: Request) {
     );
   }
 
-  const apiKey = process.env.ZEPTOMAIL_API_KEY;
-  const fromAddress = process.env.ZEPTOMAIL_FROM_EMAIL || "noreply@imabdullah.com";
-  const fromName = process.env.ZEPTOMAIL_FROM_NAME || "Redorch Website";
+  const apiKey = getEnv("ZEPTOMAIL_API_KEY");
+  const fromAddress = getEnv("ZEPTOMAIL_FROM_EMAIL") || defaultFromAddress;
+  const fromName = getEnv("ZEPTOMAIL_FROM_NAME") || "Redorch Website";
+  const recipients = getRecipients();
 
   if (!apiKey) {
     return NextResponse.json(
       { ok: false, message: "Email service is not configured yet." },
+      { status: 500 },
+    );
+  }
+
+  if (!isEmail(fromAddress) || recipients.some((recipient) => !isEmail(recipient))) {
+    console.error("ZeptoMail contact form is misconfigured", {
+      fromAddress,
+      recipients,
+    });
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          "Email service is not configured correctly. Please email hello@redorch.com directly.",
+      },
       { status: 500 },
     );
   }
@@ -213,36 +278,70 @@ export async function POST(request: Request) {
     submittedAt,
   };
 
-  const response = await fetch("https://api.zeptomail.com/v1.1/email", {
-    method: "POST",
-    headers: {
-      accept: "application/json",
-      authorization: getAuthorizationHeader(apiKey),
-      "cache-control": "no-cache",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      from: { address: fromAddress, name: fromName },
-      to: getRecipients().map((address) => ({
-        email_address: { address, name: address.split("@")[0] },
-      })),
-      reply_to: [{ address: email, name: fullName }],
-      subject: `New Redorch quote request: ${service || "General inquiry"}`,
-      htmlbody: buildEmailHtml(emailPayload),
-      textbody: buildEmailText(emailPayload),
-      track_clicks: false,
-      track_opens: false,
-      client_reference: `redorch-contact-${Date.now()}`,
-    }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(getEmailServiceUrl(), {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        authorization: getAuthorizationHeader(apiKey),
+        "cache-control": "no-cache",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        from: { address: fromAddress, name: fromName },
+        to: recipients.map((address) => ({
+          email_address: { address, name: address.split("@")[0] },
+        })),
+        reply_to: [{ address: email, name: fullName }],
+        subject: `New Redorch quote request: ${service || "General inquiry"}`,
+        htmlbody: buildEmailHtml(emailPayload),
+        textbody: buildEmailText(emailPayload),
+        track_clicks: false,
+        track_opens: false,
+        client_reference: `redorch-contact-${Date.now()}`,
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    console.error("ZeptoMail contact form request failed", {
+      error: error instanceof Error ? error.message : String(error),
+      fromAddress,
+      recipients,
+    });
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          "Email service is unavailable right now. Please email hello@redorch.com directly.",
+      },
+      { status: 502 },
+    );
+  }
 
   const responseText = await response.text();
 
   if (!response.ok) {
-    console.error("ZeptoMail contact form failed", response.status, responseText);
+    const error = parseZeptoMailError(responseText);
+
+    console.error("ZeptoMail contact form failed", {
+      status: response.status,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      requestId: error.requestId,
+      fromAddress,
+      recipients,
+    });
 
     return NextResponse.json(
-      { ok: false, message: "Email sending failed. Please try again later." },
+      {
+        ok: false,
+        message:
+          "Email service rejected the request. Please email hello@redorch.com directly.",
+      },
       { status: 502 },
     );
   }

@@ -3,5 +3,6 @@ node_modules/
 out/
 .codex-run/
 .env*
+!.env.example
 *.log
 *.zip

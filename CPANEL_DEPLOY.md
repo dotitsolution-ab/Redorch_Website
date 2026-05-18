@@ -58,10 +58,13 @@ Set these in cPanel before starting the app:
 
 ```env
 ZEPTOMAIL_API_KEY=your_zeptomail_api_key
-ZEPTOMAIL_FROM_EMAIL=noreply@imabdullah.com
+ZEPTOMAIL_FROM_EMAIL=hello@redorch.com
 ZEPTOMAIL_FROM_NAME=Redorch Website
+ZEPTOMAIL_API_URL=https://api.zeptomail.com/v1.1/email
 CONTACT_TO_EMAILS=nazmul@redorch.com,ab@redorch.com
 NODE_ENV=production
 ```
+
+`ZEPTOMAIL_FROM_EMAIL` must be a sender address whose domain is verified inside the same ZeptoMail Agent that created `ZEPTOMAIL_API_KEY`. If ZeptoMail gives your account a regional API endpoint, set `ZEPTOMAIL_API_URL` to that exact endpoint from the ZeptoMail API setup screen.
 
 After changing environment variables, restart the Node.js app.
