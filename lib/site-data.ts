@@ -1188,57 +1188,8 @@ function countWords(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-const generatedPostImages = {
-  business: "/images/generated/business-cms-backend-dashboard.webp",
-  digital: "/images/generated/redorch-digital-product-lab.webp",
-  game: "/images/generated/game-ar-vr-experience-studio.webp",
-  seo: "/images/generated/seo-content-growth-workspace.webp",
-  team: "/images/generated/redorch-team-studio.webp",
-  webMobile: "/images/generated/web-mobile-development-studio.webp",
-} as const;
-
 function getGeneratedPostImage(post: BlogPost) {
-  const haystack = `${post.slug} ${post.category} ${post.title}`.toLowerCase();
-
-  if (haystack.includes("game") || haystack.includes("ar-vr")) {
-    return generatedPostImages.game;
-  }
-
-  if (
-    haystack.includes("seo") ||
-    haystack.includes("marketing") ||
-    haystack.includes("redesign") ||
-    haystack.includes("ui/ux") ||
-    haystack.includes("conversion")
-  ) {
-    return generatedPostImages.seo;
-  }
-
-  if (
-    haystack.includes("mobile") ||
-    haystack.includes("web-application") ||
-    haystack.includes("nextjs") ||
-    haystack.includes("technical")
-  ) {
-    return generatedPostImages.webMobile;
-  }
-
-  if (
-    haystack.includes("cms") ||
-    haystack.includes("backend") ||
-    haystack.includes("business") ||
-    haystack.includes("inventory") ||
-    haystack.includes("logistics") ||
-    haystack.includes("ecommerce")
-  ) {
-    return generatedPostImages.business;
-  }
-
-  if (haystack.includes("hiring") || haystack.includes("company")) {
-    return generatedPostImages.team;
-  }
-
-  return generatedPostImages.digital;
+  return `/images/blog/${post.slug}.webp`;
 }
 
 function buildLongFormBody(post: BlogPost) {
@@ -1669,27 +1620,6 @@ const baseBlogPosts: BlogPost[] = [
       "Choosing a software development company is not only a price decision. The right partner should understand the business goal, ask useful questions, explain tradeoffs, and show a realistic path from planning to launch.",
       "Look for a team that can discuss user experience, frontend quality, backend structure, SEO, security, testing, deployment, and support. A strong portfolio helps, but the conversation around your project is just as important.",
       "Redorch works as a product-minded technology partner. That means the team focuses on outcomes, not just tasks, and keeps the build aligned with real business needs.",
-    ],
-  },
-  {
-    slug: "hello-world",
-    title: "Hello world!",
-    href: "/hello-world/",
-    date: "January 10, 2022",
-    publishedAt: "2022-01-10",
-    category: "Company",
-    image: "/images/wall-logo.jpg",
-    excerpt:
-      "Welcome to Redorch Technology's redesigned digital home, built for faster pages, clearer services, and CMS-ready growth.",
-    seoTitle: "Redorch Technology Blog Launch and CMS-Ready Frontend",
-    seoDescription:
-      "Welcome to Redorch Technology's redesigned frontend foundation with faster pages, clearer services, SEO content, and CMS-ready structure.",
-    keywords: ["Redorch Technology", "CMS ready frontend", "Next.js website"],
-    readingTime: "3 min read",
-    body: [
-      "Welcome to Redorch Technology's new frontend foundation. This first post keeps the original WordPress slug while replacing placeholder copy with a better introduction for search engines and visitors.",
-      "The website is structured around practical service pages, project case studies, SEO metadata, and a future-ready content model. Blog articles can later be managed from a Node.js and MySQL CMS without changing the public route structure.",
-      "For now, the frontend is ready as a static Next.js export, which makes it simple to host on cPanel while the backend CMS is developed in the next phase.",
     ],
   },
 ];
