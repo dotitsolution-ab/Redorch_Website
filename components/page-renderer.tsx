@@ -38,6 +38,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BlogList } from "@/components/blog-list";
 import { ContactForm } from "@/components/contact-form";
+import { ProjectImageLightbox } from "@/components/project-image-lightbox";
 import { ServiceFeatureGrid } from "@/components/service-feature-grid";
 import { Button } from "@/components/ui/button";
 import {
@@ -901,6 +902,7 @@ function ProjectsPage({ title, description }: { title: string; description: stri
         description={description}
         image="/images/project-delivery.png"
         compact
+        visual={false}
       />
       <section className="section-surface py-24">
         <div className="container grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -971,6 +973,7 @@ function ProjectDetailPage({ project }: { project: Project }) {
         <div className="container grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
           <aside className="premium-card rounded-lg border border-white/80 p-6">
             <h2 className="text-lg font-semibold text-foreground">Case study snapshot</h2>
+            <ProjectImageLightbox image={project.image} title={project.title} />
             <dl className="mt-5 grid gap-4 text-sm">
               <div>
                 <dt className="font-semibold text-foreground">Category</dt>
