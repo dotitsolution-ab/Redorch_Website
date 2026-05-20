@@ -19,6 +19,8 @@ type PageProps = {
   }>;
 };
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return allRoutes.map((route) => ({
     slug: route === "/" ? [] : route.split("/").filter(Boolean),
