@@ -1,4 +1,4 @@
 name = "redorch-website"
 pages_build_output_dir = ".vercel/output/static"
 compatibility_date = "2026-05-20"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
