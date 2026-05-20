@@ -12,14 +12,6 @@ import {
 } from "@/lib/site-data";
 import { pathFromSlug } from "@/lib/utils";
 
-type PageProps = {
-  params: Promise<{
-    slug?: string[];
-  }>;
-};
-
-export const runtime = "edge";
-
 type RouteView = NonNullable<ReturnType<typeof getViewForPath>>;
 type JsonLd = Record<string, unknown>;
 
@@ -543,8 +535,7 @@ function buildSchemas(view: RouteView, path: string): JsonLd[] {
   return schemas;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateRouteMetadata(slug?: string[]): Promise<Metadata> {
   const path = pathFromSlug(slug);
   const view = getViewForPath(path);
 
@@ -620,8 +611,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-export default async function Page({ params }: PageProps) {
-  const { slug } = await params;
+export async function RoutePage({ slug }: { slug?: string[] }) {
   const path = pathFromSlug(slug);
   const view = getViewForPath(path);
 
@@ -640,7 +630,7 @@ export default async function Page({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
-      <PageRenderer view={view} />
+      <PageRenderer key={path} view={view} />
     </>
   );
 }
